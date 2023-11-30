@@ -66,12 +66,14 @@ public class SessionService {
             throw new NotFoundException();
         }
 
-        boolean alreadyParticipate = session.getUsers().stream().anyMatch(o -> o.getId().equals(userId));
+        boolean alreadyParticipate = session.getUsers().stream()
+                .anyMatch(o -> o.getId().equals(userId));
         if(!alreadyParticipate) {
             throw new BadRequestException();
         }
 
-        session.setUsers(session.getUsers().stream().filter(user -> !user.getId().equals(userId)).collect(Collectors.toList()));
+        session.setUsers(session.getUsers().stream().filter(user -> !user.getId()
+                .equals(userId)).collect(Collectors.toList()));
 
         this.sessionRepository.save(session);
     }
