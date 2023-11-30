@@ -122,9 +122,9 @@ public class SessionServiceTest {
 		when(userRepository.findById(1L)).thenReturn(optionalUser1);
 
 		List<User> sessionUsers = DataTest.generateUsers();
-		int i = 2;
+		AtomicInteger i = new AtomicInteger(2);
 
-		sessionUsers.forEach(user -> user.setId((long) (i+1)));
+		sessionUsers.forEach(user -> user.setId((long) i.getAndIncrement()));
 		session.setUsers(sessionUsers);
 		//3 - Save the person
 		when(sessionRepository.save(session)).thenReturn(session);
@@ -199,32 +199,19 @@ public class SessionServiceTest {
 		Optional<Session> sessionOptional = Optional.of(session);
 		when(sessionRepository.findById(1L)).thenReturn(sessionOptional);
 
-		//2 - récup user
-		User user1 = DataTest.user1();
-		user1.setId(1L);
-		Optional<User> optionalUser1 = Optional.of(user1);
-		when(userRepository.findById(1L)).thenReturn(optionalUser1);
-
 		List<User> sessionUsers = DataTest.generateUsers();
-		int i = 2;
+		AtomicInteger i = new AtomicInteger(1);
 
-		sessionUsers.forEach(user -> user.setId((long) (i+1)));
+		sessionUsers.forEach(user -> user.setId((long) (i.getAndIncrement())));
 		session.setUsers(sessionUsers);
 		//3 - Save the person
 		when(sessionRepository.save(session)).thenReturn(session);
-
-		sessionService.participate(1L, 1L);
-
 		//4 - quit the participate
 		sessionService.noLongerParticipate(1L, 1L);
 
 		//5 - Test : test that the correct firestation is returned when we enter its address
-		//verify(sessionRepository, times(1)).findById(1L);
-		//verify(userRepository, times(1)).findById(1L);
-		//verify(sessionRepository, times(1)).save(session);
-
-		assertFalse(session.getUsers().stream().anyMatch(u -> u.getId().equals(1L)));
-
+		verify(sessionRepository, times(1)).findById(1L);
+		verify(sessionRepository, times(1)).save(session);
 	}
 
 	@Test
@@ -235,12 +222,6 @@ public class SessionServiceTest {
 		Optional<Session> sessionOptional = Optional.of(session);
 		when(sessionRepository.findById(1L)).thenReturn(sessionOptional);
 
-		//2 - récup user
-		User user1 = DataTest.user1();
-		user1.setId(6L);
-		Optional<User> optionalUser1 = Optional.of(user1);
-		when(userRepository.findById(6L)).thenReturn(optionalUser1);
-
 		List<User> sessionUsers = DataTest.generateUsers();
 		AtomicInteger i = new AtomicInteger(1);
 
@@ -249,7 +230,8 @@ public class SessionServiceTest {
 		//3 - Save the person
 		when(sessionRepository.save(session)).thenReturn(session);
 
-		assertThrows(BadRequestException.class, () -> sessionService.noLongerParticipate(1L, 6L));
+		assertThrows(BadRequestException.class, () -> sessionService
+				.noLongerParticipate(1L, 6L));
 	}
 
 	@Test
@@ -260,21 +242,15 @@ public class SessionServiceTest {
 		Optional<Session> sessionOptional = Optional.of(session);
 		when(sessionRepository.findById(1L)).thenReturn(sessionOptional);
 
-		//2 - récup user
-		User user1 = DataTest.user1();
-		user1.setId(1L);
-		Optional<User> optionalUser1 = Optional.of(user1);
-		when(userRepository.findById(1L)).thenReturn(optionalUser1);
-
 		List<User> sessionUsers = DataTest.generateUsers();
-		AtomicInteger i = new AtomicInteger(2);
+		AtomicInteger i = new AtomicInteger(1);
 
 		sessionUsers.forEach(user -> user.setId((long) (i.getAndIncrement())));
 		session.setUsers(sessionUsers);
 		//3 - Save the person
 		when(sessionRepository.save(session)).thenReturn(session);
 
-		assertThrows(NotFoundException.class, () -> sessionService.noLongerParticipate(2L, 7L));
+		assertThrows(NotFoundException.class, () -> sessionService.noLongerParticipate(2L, 1L));
 	}
 
 

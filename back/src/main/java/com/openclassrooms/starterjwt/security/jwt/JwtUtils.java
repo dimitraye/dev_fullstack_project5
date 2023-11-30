@@ -32,6 +32,7 @@ public class JwtUtils {
         .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
         .signWith(SignatureAlgorithm.HS512, jwtSecret)
         .compact();
+
   }
 
   public String getUserNameFromJwtToken(String token) {
@@ -55,5 +56,19 @@ public class JwtUtils {
     }
 
     return false;
+  }
+
+
+  public String generateJwtToken(Authentication authentication, Integer customExpirationMs) {
+    UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
+
+    int expiration = (customExpirationMs != null) ? customExpirationMs : jwtExpirationMs;
+
+    return Jwts.builder()
+            .setSubject(userPrincipal.getUsername())
+            .setIssuedAt(new Date())
+            .setExpiration(new Date(new Date().getTime() + expiration))
+            .signWith(SignatureAlgorithm.HS512, jwtSecret)
+            .compact();
   }
 }
